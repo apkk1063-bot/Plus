@@ -2,45 +2,58 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Real Car Game</title>
+    <title>Advanced Car Game</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; touch-action: manipulation; }
-        canvas { background: #333; display: block; margin: 0 auto; border-left: 4px solid #fff; border-right: 4px solid #fff; }
-        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 22px; z-index: 10; font-weight: bold; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', Courier, monospace; touch-action: manipulation; }
+        canvas { background: #333; display: block; margin: 0 auto; border-left: 5px solid #fff; border-right: 5px solid #fff; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 10; }
+        .score-text { font-size: 20px; font-weight: bold; color: #00dbff; }
+        .best-score { font-size: 14px; color: #ffeb3b; }
         .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-around; z-index: 20; }
-        .btn { width: 85px; height: 85px; background: rgba(255,255,255,0.2); border-radius: 50%; color: white; 
-               display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #00dbff; font-size: 20px; }
-        .btn:active { background: #00dbff; color: black; }
+        .btn { width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; 
+               display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #00dbff; }
+        .btn:active { background: rgba(0, 219, 255, 0.5); }
     </style>
 </head>
 <body>
-    <div id="score">Score: 0</div>
+    <div id="ui">
+        <div id="score" class="score-text">အမှတ်: 0</div>
+        <div id="bestScore" class="best-score">အများဆုံးမှတ်: 0</div>
+    </div>
     <canvas id="gameCanvas"></canvas>
     <div class="controls">
-        <div class="btn" id="leftBtn">LEFT</div>
-        <div class="btn" id="rightBtn">RIGHT</div>
+        <div class="btn" id="leftBtn">ဘယ်</div>
+        <div class="btn" id="rightBtn">ညာ</div>
     </div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const scoreElement = document.getElementById("score");
+        
+        // အသံဖိုင်များ
+        const scoreSound = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+        const crashSound = new Audio('https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3');
 
         canvas.width = window.innerWidth > 400 ? 400 : window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // ပုံများ ထည့်သွင်းခြင်း
         const playerImg = new Image();
-        playerImg.src = 'https://i.imgur.com/7vY6L5G.png'; // အပြာရောင်ကားပုံ
-
+        playerImg.src = 'https://i.imgur.com/7vY6L5G.png'; 
         const enemyImg = new Image();
-        enemyImg.src = 'https://i.imgur.com/Kdf9H7H.png'; // အနီရောင်ကားပုံ
+        enemyImg.src = 'https://i.imgur.com/Kdf9H7H.png'; 
 
         let score = 0;
+        let highscore = localStorage.getItem("highscore") || 0;
+        document.getElementById("bestScore").innerText = "အများဆုံးမှတ်: " + highscore;
+
+        let enemySpeed = 5;
+        let spawnInterval = 1500;
+        let lastSpawn = 0;
         let car = { x: canvas.width/2 - 25, y: canvas.height - 180, w: 50, h: 90 };
         let enemies = [];
         let moveLeft = false;
         let moveRight = false;
+        let isGameOver = false;
 
         // Controls
         document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; });
@@ -48,54 +61,79 @@
         document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; });
         document.getElementById("rightBtn").addEventListener("touchend", () => moveRight = false);
 
-        function spawnEnemy() {
-            let x = Math.random() * (canvas.width - 50);
-            enemies.push({ x: x, y: -100, w: 50, h: 90 });
-        }
+        function update(timestamp) {
+            if (isGameOver) return;
 
-        function update() {
             if (moveLeft && car.x > 0) car.x -= 8;
             if (moveRight && car.x < canvas.width - car.w) car.x += 8;
 
+            if (timestamp - lastSpawn > spawnInterval) {
+                let x = Math.random() * (canvas.width - 50);
+                enemies.push({ x: x, y: -100, w: 50, h: 90 });
+                lastSpawn = timestamp;
+            }
+
             for (let i = 0; i < enemies.length; i++) {
-                enemies[i].y += 6; 
+                enemies[i].y += enemySpeed;
+
                 if (car.x < enemies[i].x + enemies[i].w && car.x + car.w > enemies[i].x &&
                     car.y < enemies[i].y + enemies[i].h && car.y + car.h > enemies[i].y) {
-                    alert("Game Over! Score: " + score);
-                    score = 0; enemies = []; car.x = canvas.width/2 - 25;
-                    scoreElement.innerText = "Score: " + score;
+                    endGame();
                 }
+
                 if (enemies[i].y > canvas.height) {
                     enemies.splice(i, 1);
                     score++;
-                    scoreElement.innerText = "Score: " + score;
+                    scoreSound.play(); // အမှတ်ရတိုင်း အသံမည်
+                    document.getElementById("score").innerText = "အမှတ်: " + score;
+                    if (score % 5 === 0) {
+                        enemySpeed += 0.5;
+                        spawnInterval = Math.max(700, spawnInterval - 50);
+                    }
                 }
             }
         }
 
+        function endGame() {
+            isGameOver = true;
+            crashSound.play(); // တိုက်မိတဲ့အသံ
+
+            // High Score မှတ်ခြင်း
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem("highscore", highscore);
+                document.getElementById("bestScore").innerText = "အများဆုံးမှတ်: " + highscore;
+            }
+
+            // "12345" ပြပြီး ဂိမ်းပြန်စခြင်း
+            alert("12345"); 
+            resetGame();
+        }
+
+        function resetGame() {
+            score = 0; enemySpeed = 5; spawnInterval = 1500;
+            enemies = []; car.x = canvas.width/2 - 25;
+            document.getElementById("score").innerText = "အမှတ်: 0";
+            isGameOver = false;
+        }
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // လမ်းမျဉ်းများ
-            ctx.strokeStyle = "#888"; ctx.setLineDash([30, 30]);
+            ctx.strokeStyle = "#555"; ctx.setLineDash([30, 30]);
             ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke();
-
-            // Player ကားပုံဆွဲခြင်း
             ctx.drawImage(playerImg, car.x, car.y, car.w, car.h);
-
-            // ရန်သူကားပုံဆွဲခြင်း
             for (let e of enemies) {
                 ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
             }
         }
 
-        function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
-        
-        // ပုံတွေ Load ဖြစ်ပြီးမှ ဂိမ်းစမယ်
-        playerImg.onload = () => {
-            setInterval(spawnEnemy, 1200);
-            gameLoop();
-        };
+        function gameLoop(timestamp) {
+            update(timestamp);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        playerImg.onload = () => requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
