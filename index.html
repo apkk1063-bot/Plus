@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Side-by-Side Long</title>
+    <title>Myawaddy Rate Converter (Auto-Save)</title>
     <style>
         :root {
             --primary: #3b41c5;
             --secondary: #f0f3ff;
             --white: #ffffff;
             --border: #e0e4f2;
+            --messenger: #0084ff;
         }
 
         body {
@@ -24,60 +25,66 @@
 
         .container {
             background: var(--white);
-            width: 95%; /* ဖုန်း screen အကျယ်ကို အပြည့်နီးပါး ယူထားသည် */
+            width: 95%;
             max-width: 500px;
             border-radius: 30px;
-            padding: 25px 15px;
+            padding: 40px 20px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.08);
             position: relative;
+            text-align: center;
         }
 
-        /* Admin Trigger */
-        .admin-cog { position: absolute; top: 15px; right: 20px; cursor: pointer; color: #ddd; font-size: 20px; }
+        .admin-cog { position: absolute; top: 20px; right: 25px; cursor: pointer; color: #ddd; font-size: 20px; transition: 0.3s; }
+        .admin-cog:hover { color: var(--primary); }
 
-        /* Rate Banner */
+        .header-title {
+            font-weight: 900;
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: var(--primary);
+        }
+
         .rate-banner {
-            background: var(--secondary);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 30px;
+            background: linear-gradient(135deg, #f8faff 0%, #f0f3ff 100%);
+            border-radius: 20px;
+            padding: 25px 20px;
+            width: 90%;
+            margin: 0 auto 35px auto;
             border: 1px solid var(--border);
         }
-        .rate-display { font-weight: 800; font-size: 18px; color: #333; }
+        .rate-display { font-weight: 800; font-size: 22px; color: #333; margin-bottom: 10px; }
+        .date-time { font-size: 12px; color: #70757a; font-weight: 500; }
 
-        /* --- ထိုင်းနဲ မြန်မာ ဘေးတိုက် အရှည်ဒီဇိုင်း --- */
         .calc-container {
             display: flex;
             align-items: center;
-            gap: 10px; /* အကွက်ကြား အကွာအဝေး */
+            justify-content: center;
+            gap: 12px;
             width: 100%;
         }
 
         .box {
-            flex: 2; /* အကွက်ကို ပိုရှည်စေရန် */
+            flex: 1;
             border: 2.5px solid var(--primary);
-            border-radius: 16px;
-            padding: 20px 12px; /* အထဲက အကွာအဝေးကို ပိုချဲ့ထားသည် */
+            border-radius: 18px;
+            padding: 22px 10px;
             position: relative;
             background: white;
             min-width: 0;
+            text-align: left;
         }
-
         .box.res { border-color: var(--border); background: var(--secondary); }
 
-        /* စာလုံးအပြည့်ပေါ်စေမည့် Label */
         .box-tag {
             position: absolute;
             top: -12px;
-            left: 10px;
+            left: 12px;
             background: white;
             padding: 0 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: var(--primary);
-            white-space: nowrap; /* စာလုံးမပြတ်အောင် */
-            z-index: 5;
+            white-space: nowrap;
         }
         .box.res .box-tag { background: var(--secondary); color: #777; }
 
@@ -85,63 +92,51 @@
             width: 100%;
             border: none;
             background: transparent;
-            font-size: 20px; /* ဂဏန်းကို ပိုကြီးကြီးပြသည် */
+            font-size: 20px;
             font-weight: 800;
             outline: none;
             color: #111;
         }
 
         .swap-icon {
-            flex: 0.5;
+            width: 45px;
+            height: 45px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            color: var(--primary);
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .footer-action {
+            margin-top: 40px;
             display: flex;
             justify-content: center;
-            align-items: center;
+        }
+
+        .messenger-btn {
             cursor: pointer;
-            font-size: 22px;
-            color: var(--primary);
-            background: var(--secondary);
-            height: 45px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
+            transition: transform 0.2s;
         }
+        .messenger-btn:hover { transform: scale(1.1); }
+        .messenger-btn svg { width: 55px; height: 55px; }
 
-        /* Submit Button */
-        .btn-go {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            float: right;
-            margin-top: 30px;
-            box-shadow: 0 10px 20px rgba(59, 65, 197, 0.2);
-        }
-
-        /* Footer */
-        .footer {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 100px;
-            border-top: 1px solid #f0f0f0;
-            padding-top: 20px;
-        }
-        .nav-item { text-align: center; font-size: 11px; color: #bbb; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-
-        /* Admin Popup */
         #admin-panel {
             display: none;
             position: absolute;
-            top: 50px; right: 20px;
+            top: 55px; right: 20px;
             background: white; padding: 20px;
-            border-radius: 15px; border: 1px solid #ddd;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 100; width: 220px;
+            border-radius: 20px; border: 1px solid #ddd;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            z-index: 100; width: 240px;
+            text-align: left;
         }
-        .adm-input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #eee; box-sizing: border-box; }
+        .adm-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #eee; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -151,24 +146,25 @@
 
     <div id="admin-panel">
         <div id="login-ui">
-            <h4 style="margin:0 0 10px 0;">Admin Login</h4>
-            <input type="password" id="adm-pass" class="adm-input" placeholder="Password (123456)">
-            <button onclick="login()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Login</button>
+            <h5 style="margin:0 0 10px 0;">Admin Login</h5>
+            <input type="password" id="adm-pass" class="adm-input" placeholder="Password (passထည့်ပါ)">
+            <button onclick="login()" style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">Login</button>
         </div>
         <div id="edit-ui" style="display:none;">
-            <h4 style="margin:0 0 10px 0;">Update Rates</h4>
-            <input type="number" id="new-t" class="adm-input" placeholder="THB Rate">
-            <input type="number" id="new-m" class="adm-input" placeholder="MMK Rate">
-            <button onclick="update()" style="width:100%; background:#28a745; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Update</button>
+            <h5 style="margin:0 0 10px 0;">ဈေးနှုန်းပြင်ရန်</h5>
+            <input type="number" id="new-t" class="adm-input" placeholder="ဘတ်နှုန်း (ဥပမာ-780)">
+            <input type="number" id="new-m" class="adm-input" placeholder="ကျပ်နှုန်း (ဥပမာ-100000)">
+            <button onclick="update()" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:8px; cursor:pointer;">Update & Save</button>
         </div>
     </div>
 
-    <div style="font-weight: bold; margin-bottom: 20px; color: var(--primary);">ငွေလဲလှယ်မည်</div>
+    <div class="header-title">မြဝတီ ပေါက်ဈေး</div>
 
     <div class="rate-banner">
         <div class="rate-display">
             <span id="rate-t">780</span> THB = <span id="rate-m">100,000</span> MMK
         </div>
+        <div class="date-time" id="last-update">နောက်ဆုံးအပ်ဒိတ် - ၁၈/၁/၂၀၂၆ ၄:၃၃ ညနေ</div>
     </div>
 
     <div class="calc-container">
@@ -176,27 +172,52 @@
             <span class="box-tag" id="tl">ထိုင်းဘတ် (THB)</span>
             <input type="number" id="v-in" placeholder="0" oninput="calculate()">
         </div>
-
         <div class="swap-icon" onclick="swap()">⇆</div>
-
         <div class="box res" id="br">
             <span class="box-tag" id="tr">မြန်မာကျပ် (MMK)</span>
             <input type="text" id="v-out" readonly value="0">
         </div>
     </div>
 
-    <button class="btn-go">➤</button>
-
-    <div class="footer">
-        <div class="nav-item active">📱<br><span>ဖုန်းငွေဖြည့်</span></div>
-        <div class="nav-item">👥<br><span>လူကြီးမင်း</span></div>
-        <div class="nav-item">🎧<br><span>အကူအညီ</span></div>
-        <div class="nav-item">⚙️<br><span>ဆက်တင်</span></div>
+    <div class="footer-action">
+        <div class="messenger-btn" onclick="openMessenger()">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.477 2 2 6.145 2 11.258C2 14.17 3.447 16.737 5.714 18.374V22L9.202 20.086C10.091 20.333 11.03 20.472 12 20.472C17.523 20.472 22 16.327 22 11.214C22 6.101 17.523 2 12 2ZM13.102 14.288L11.102 12.155L7.202 14.288L11.416 9.814L13.416 11.947L17.316 9.814L13.102 14.288Z" fill="#0084FF"/>
+            </svg>
+        </div>
     </div>
 </div>
 
 <script>
     let rT = 780, rM = 100000, isT = true;
+
+    // Browser ထဲမှာ သိမ်းထားတဲ့ Data ကို ပြန်ခေါ်ခြင်း
+    function loadSavedData() {
+        const savedT = localStorage.getItem('rateT');
+        const savedM = localStorage.getItem('rateM');
+        const savedDate = localStorage.getItem('lastUpdate');
+
+        if (savedT) rT = savedT;
+        if (savedM) rM = savedM;
+        
+        document.getElementById('rate-t').innerText = rT;
+        document.getElementById('rate-m').innerText = Number(rM).toLocaleString();
+        
+        if (savedDate) {
+            document.getElementById('last-update').innerText = savedDate;
+        } else {
+            updateDateTime();
+        }
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('my-MM', { year: 'numeric', month: 'numeric', day: 'numeric' });
+        const timeStr = now.toLocaleTimeString('my-MM', { hour: 'numeric', minute: 'numeric', hour12: true });
+        const fullDate = `နောက်ဆုံးအပ်ဒိတ် - ${dateStr} ${timeStr}`;
+        document.getElementById('last-update').innerText = fullDate;
+        return fullDate;
+    }
 
     function toggleAdmin() { 
         let p = document.getElementById('admin-panel'); 
@@ -213,9 +234,19 @@
     function update() {
         rT = document.getElementById('new-t').value || rT;
         rM = document.getElementById('new-m').value || rM;
+        
+        const dateText = updateDateTime();
+
+        // Data သိမ်းဆည်းခြင်း (LocalStorage)
+        localStorage.setItem('rateT', rT);
+        localStorage.setItem('rateM', rM);
+        localStorage.setItem('lastUpdate', dateText);
+
         document.getElementById('rate-t').innerText = rT;
         document.getElementById('rate-m').innerText = Number(rM).toLocaleString();
-        toggleAdmin(); calculate();
+        
+        toggleAdmin(); 
+        calculate();
     }
 
     function swap() {
@@ -224,7 +255,8 @@
         document.getElementById('tr').innerText = isT ? "မြန်မာကျပ် (MMK)" : "ထိုင်းဘတ် (THB)";
         document.getElementById('bl').classList.toggle('res', !isT);
         document.getElementById('br').classList.toggle('res', isT);
-        document.getElementById('v-in').value = ""; document.getElementById('v-out').value = "0";
+        document.getElementById('v-in').value = ""; 
+        document.getElementById('v-out').value = "0";
     }
 
     function calculate() {
@@ -235,7 +267,18 @@
             o.value = Math.round(res).toLocaleString();
         } else o.value = "0";
     }
+
+    function openMessenger() {
+        window.location.href = "fb-messenger://";
+        setTimeout(function() {
+            window.location.href = "https://www.messenger.com";
+        }, 500);
+    }
+
+    // App စဖွင့်ချိန်မှာ Data ကို Load လုပ်ရန်
+    loadSavedData();
 </script>
 
 </body>
 </html>
+
