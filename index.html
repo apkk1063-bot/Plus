@@ -1,284 +1,101 @@
 <!DOCTYPE html>
-<html lang="my">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myawaddy Rate Converter (Auto-Save)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Real Car Game</title>
     <style>
-        :root {
-            --primary: #3b41c5;
-            --secondary: #f0f3ff;
-            --white: #ffffff;
-            --border: #e0e4f2;
-            --messenger: #0084ff;
-        }
-
-        body {
-            font-family: sans-serif;
-            background-color: #f4f6fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: var(--white);
-            width: 95%;
-            max-width: 500px;
-            border-radius: 30px;
-            padding: 40px 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
-            position: relative;
-            text-align: center;
-        }
-
-        .admin-cog { position: absolute; top: 20px; right: 25px; cursor: pointer; color: #ddd; font-size: 20px; transition: 0.3s; }
-        .admin-cog:hover { color: var(--primary); }
-
-        .header-title {
-            font-weight: 900;
-            font-size: 24px;
-            margin-bottom: 25px;
-            color: var(--primary);
-        }
-
-        .rate-banner {
-            background: linear-gradient(135deg, #f8faff 0%, #f0f3ff 100%);
-            border-radius: 20px;
-            padding: 25px 20px;
-            width: 90%;
-            margin: 0 auto 35px auto;
-            border: 1px solid var(--border);
-        }
-        .rate-display { font-weight: 800; font-size: 22px; color: #333; margin-bottom: 10px; }
-        .date-time { font-size: 12px; color: #70757a; font-weight: 500; }
-
-        .calc-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .box {
-            flex: 1;
-            border: 2.5px solid var(--primary);
-            border-radius: 18px;
-            padding: 22px 10px;
-            position: relative;
-            background: white;
-            min-width: 0;
-            text-align: left;
-        }
-        .box.res { border-color: var(--border); background: var(--secondary); }
-
-        .box-tag {
-            position: absolute;
-            top: -12px;
-            left: 12px;
-            background: white;
-            padding: 0 8px;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--primary);
-            white-space: nowrap;
-        }
-        .box.res .box-tag { background: var(--secondary); color: #777; }
-
-        .box input {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-size: 20px;
-            font-weight: 800;
-            outline: none;
-            color: #111;
-        }
-
-        .swap-icon {
-            width: 45px;
-            height: 45px;
-            background: var(--secondary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            color: var(--primary);
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-
-        .footer-action {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .messenger-btn {
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .messenger-btn:hover { transform: scale(1.1); }
-        .messenger-btn svg { width: 55px; height: 55px; }
-
-        #admin-panel {
-            display: none;
-            position: absolute;
-            top: 55px; right: 20px;
-            background: white; padding: 20px;
-            border-radius: 20px; border: 1px solid #ddd;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-            z-index: 100; width: 240px;
-            text-align: left;
-        }
-        .adm-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #eee; box-sizing: border-box; outline: none; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; touch-action: manipulation; }
+        canvas { background: #333; display: block; margin: 0 auto; border-left: 4px solid #fff; border-right: 4px solid #fff; }
+        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 22px; z-index: 10; font-weight: bold; }
+        .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-around; z-index: 20; }
+        .btn { width: 85px; height: 85px; background: rgba(255,255,255,0.2); border-radius: 50%; color: white; 
+               display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #00dbff; font-size: 20px; }
+        .btn:active { background: #00dbff; color: black; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="admin-cog" onclick="toggleAdmin()">⚙️</div>
-
-    <div id="admin-panel">
-        <div id="login-ui">
-            <h5 style="margin:0 0 10px 0;">Admin Login</h5>
-            <input type="password" id="adm-pass" class="adm-input" placeholder="Password (passထည့်ပါ)">
-            <button onclick="login()" style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">Login</button>
-        </div>
-        <div id="edit-ui" style="display:none;">
-            <h5 style="margin:0 0 10px 0;">ဈေးနှုန်းပြင်ရန်</h5>
-            <input type="number" id="new-t" class="adm-input" placeholder="ဘတ်နှုန်း (ဥပမာ-780)">
-            <input type="number" id="new-m" class="adm-input" placeholder="ကျပ်နှုန်း (ဥပမာ-100000)">
-            <button onclick="update()" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:8px; cursor:pointer;">Update & Save</button>
-        </div>
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+        <div class="btn" id="leftBtn">LEFT</div>
+        <div class="btn" id="rightBtn">RIGHT</div>
     </div>
 
-    <div class="header-title">မြဝတီ ပေါက်ဈေး</div>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("score");
 
-    <div class="rate-banner">
-        <div class="rate-display">
-            <span id="rate-t">780</span> THB = <span id="rate-m">100,000</span> MMK
-        </div>
-        <div class="date-time" id="last-update">နောက်ဆုံးအပ်ဒိတ် - ၁၈/၁/၂၀၂၆ ၄:၃၃ ညနေ</div>
-    </div>
+        canvas.width = window.innerWidth > 400 ? 400 : window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    <div class="calc-container">
-        <div class="box" id="bl">
-            <span class="box-tag" id="tl">ထိုင်းဘတ် (THB)</span>
-            <input type="number" id="v-in" placeholder="0" oninput="calculate()">
-        </div>
-        <div class="swap-icon" onclick="swap()">⇆</div>
-        <div class="box res" id="br">
-            <span class="box-tag" id="tr">မြန်မာကျပ် (MMK)</span>
-            <input type="text" id="v-out" readonly value="0">
-        </div>
-    </div>
+        // ပုံများ ထည့်သွင်းခြင်း
+        const playerImg = new Image();
+        playerImg.src = 'https://i.imgur.com/7vY6L5G.png'; // အပြာရောင်ကားပုံ
 
-    <div class="footer-action">
-        <div class="messenger-btn" onclick="openMessenger()">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.477 2 2 6.145 2 11.258C2 14.17 3.447 16.737 5.714 18.374V22L9.202 20.086C10.091 20.333 11.03 20.472 12 20.472C17.523 20.472 22 16.327 22 11.214C22 6.101 17.523 2 12 2ZM13.102 14.288L11.102 12.155L7.202 14.288L11.416 9.814L13.416 11.947L17.316 9.814L13.102 14.288Z" fill="#0084FF"/>
-            </svg>
-        </div>
-    </div>
-</div>
+        const enemyImg = new Image();
+        enemyImg.src = 'https://i.imgur.com/Kdf9H7H.png'; // အနီရောင်ကားပုံ
 
-<script>
-    let rT = 780, rM = 100000, isT = true;
+        let score = 0;
+        let car = { x: canvas.width/2 - 25, y: canvas.height - 180, w: 50, h: 90 };
+        let enemies = [];
+        let moveLeft = false;
+        let moveRight = false;
 
-    // Browser ထဲမှာ သိမ်းထားတဲ့ Data ကို ပြန်ခေါ်ခြင်း
-    function loadSavedData() {
-        const savedT = localStorage.getItem('rateT');
-        const savedM = localStorage.getItem('rateM');
-        const savedDate = localStorage.getItem('lastUpdate');
+        // Controls
+        document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; });
+        document.getElementById("leftBtn").addEventListener("touchend", () => moveLeft = false);
+        document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; });
+        document.getElementById("rightBtn").addEventListener("touchend", () => moveRight = false);
 
-        if (savedT) rT = savedT;
-        if (savedM) rM = savedM;
-        
-        document.getElementById('rate-t').innerText = rT;
-        document.getElementById('rate-m').innerText = Number(rM).toLocaleString();
-        
-        if (savedDate) {
-            document.getElementById('last-update').innerText = savedDate;
-        } else {
-            updateDateTime();
+        function spawnEnemy() {
+            let x = Math.random() * (canvas.width - 50);
+            enemies.push({ x: x, y: -100, w: 50, h: 90 });
         }
-    }
 
-    function updateDateTime() {
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('my-MM', { year: 'numeric', month: 'numeric', day: 'numeric' });
-        const timeStr = now.toLocaleTimeString('my-MM', { hour: 'numeric', minute: 'numeric', hour12: true });
-        const fullDate = `နောက်ဆုံးအပ်ဒိတ် - ${dateStr} ${timeStr}`;
-        document.getElementById('last-update').innerText = fullDate;
-        return fullDate;
-    }
+        function update() {
+            if (moveLeft && car.x > 0) car.x -= 8;
+            if (moveRight && car.x < canvas.width - car.w) car.x += 8;
 
-    function toggleAdmin() { 
-        let p = document.getElementById('admin-panel'); 
-        p.style.display = (p.style.display==='block')?'none':'block'; 
-    }
-    
-    function login() {
-        if(document.getElementById('adm-pass').value === '123456') {
-            document.getElementById('login-ui').style.display = 'none';
-            document.getElementById('edit-ui').style.display = 'block';
-        } else alert("စကားဝှက်မှားနေပါသည်");
-    }
+            for (let i = 0; i < enemies.length; i++) {
+                enemies[i].y += 6; 
+                if (car.x < enemies[i].x + enemies[i].w && car.x + car.w > enemies[i].x &&
+                    car.y < enemies[i].y + enemies[i].h && car.y + car.h > enemies[i].y) {
+                    alert("Game Over! Score: " + score);
+                    score = 0; enemies = []; car.x = canvas.width/2 - 25;
+                    scoreElement.innerText = "Score: " + score;
+                }
+                if (enemies[i].y > canvas.height) {
+                    enemies.splice(i, 1);
+                    score++;
+                    scoreElement.innerText = "Score: " + score;
+                }
+            }
+        }
 
-    function update() {
-        rT = document.getElementById('new-t').value || rT;
-        rM = document.getElementById('new-m').value || rM;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // လမ်းမျဉ်းများ
+            ctx.strokeStyle = "#888"; ctx.setLineDash([30, 30]);
+            ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke();
+
+            // Player ကားပုံဆွဲခြင်း
+            ctx.drawImage(playerImg, car.x, car.y, car.w, car.h);
+
+            // ရန်သူကားပုံဆွဲခြင်း
+            for (let e of enemies) {
+                ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
+            }
+        }
+
+        function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
         
-        const dateText = updateDateTime();
-
-        // Data သိမ်းဆည်းခြင်း (LocalStorage)
-        localStorage.setItem('rateT', rT);
-        localStorage.setItem('rateM', rM);
-        localStorage.setItem('lastUpdate', dateText);
-
-        document.getElementById('rate-t').innerText = rT;
-        document.getElementById('rate-m').innerText = Number(rM).toLocaleString();
-        
-        toggleAdmin(); 
-        calculate();
-    }
-
-    function swap() {
-        isT = !isT;
-        document.getElementById('tl').innerText = isT ? "ထိုင်းဘတ် (THB)" : "မြန်မာကျပ် (MMK)";
-        document.getElementById('tr').innerText = isT ? "မြန်မာကျပ် (MMK)" : "ထိုင်းဘတ် (THB)";
-        document.getElementById('bl').classList.toggle('res', !isT);
-        document.getElementById('br').classList.toggle('res', isT);
-        document.getElementById('v-in').value = ""; 
-        document.getElementById('v-out').value = "0";
-    }
-
-    function calculate() {
-        let v = document.getElementById('v-in').value;
-        let o = document.getElementById('v-out');
-        if(v > 0) {
-            let res = isT ? (v * (rM/rT)) : (v / (rM/rT));
-            o.value = Math.round(res).toLocaleString();
-        } else o.value = "0";
-    }
-
-    function openMessenger() {
-        window.location.href = "fb-messenger://";
-        setTimeout(function() {
-            window.location.href = "https://www.messenger.com";
-        }, 500);
-    }
-
-    // App စဖွင့်ချိန်မှာ Data ကို Load လုပ်ရန်
-    loadSavedData();
-</script>
-
+        // ပုံတွေ Load ဖြစ်ပြီးမှ ဂိမ်းစမယ်
+        playerImg.onload = () => {
+            setInterval(spawnEnemy, 1200);
+            gameLoop();
+        };
+    </script>
 </body>
 </html>
-
