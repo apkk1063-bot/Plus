@@ -2,17 +2,24 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Advanced Car Game</title>
+    <title>Car Game Countdown</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', Courier, monospace; touch-action: manipulation; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: 'Arial', sans-serif; touch-action: manipulation; }
         canvas { background: #333; display: block; margin: 0 auto; border-left: 5px solid #fff; border-right: 5px solid #fff; }
         #ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 10; }
         .score-text { font-size: 20px; font-weight: bold; color: #00dbff; }
         .best-score { font-size: 14px; color: #ffeb3b; }
+        
+        /* စက္ကန့်ပြမည့်နေရာ */
+        #countdown { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 80px; font-weight: bold; display: none; z-index: 30;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+
         .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-around; z-index: 20; }
         .btn { width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; 
                display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #00dbff; }
-        .btn:active { background: rgba(0, 219, 255, 0.5); }
     </style>
 </head>
 <body>
@@ -20,7 +27,11 @@
         <div id="score" class="score-text">အမှတ်: 0</div>
         <div id="bestScore" class="best-score">အများဆုံးမှတ်: 0</div>
     </div>
+    
+    <div id="countdown">5</div>
+
     <canvas id="gameCanvas"></canvas>
+    
     <div class="controls">
         <div class="btn" id="leftBtn">ဘယ်</div>
         <div class="btn" id="rightBtn">ညာ</div>
@@ -29,8 +40,8 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const countDisplay = document.getElementById("countdown");
         
-        // အသံဖိုင်များ
         const scoreSound = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
         const crashSound = new Audio('https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3');
 
@@ -55,7 +66,6 @@
         let moveRight = false;
         let isGameOver = false;
 
-        // Controls
         document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; });
         document.getElementById("leftBtn").addEventListener("touchend", () => moveLeft = false);
         document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; });
@@ -75,39 +85,43 @@
 
             for (let i = 0; i < enemies.length; i++) {
                 enemies[i].y += enemySpeed;
-
                 if (car.x < enemies[i].x + enemies[i].w && car.x + car.w > enemies[i].x &&
                     car.y < enemies[i].y + enemies[i].h && car.y + car.h > enemies[i].y) {
-                    endGame();
+                    startCountdown();
                 }
-
                 if (enemies[i].y > canvas.height) {
                     enemies.splice(i, 1);
                     score++;
-                    scoreSound.play(); // အမှတ်ရတိုင်း အသံမည်
+                    scoreSound.play();
                     document.getElementById("score").innerText = "အမှတ်: " + score;
-                    if (score % 5 === 0) {
-                        enemySpeed += 0.5;
-                        spawnInterval = Math.max(700, spawnInterval - 50);
-                    }
                 }
             }
         }
 
-        function endGame() {
+        function startCountdown() {
             isGameOver = true;
-            crashSound.play(); // တိုက်မိတဲ့အသံ
+            crashSound.play();
 
-            // High Score မှတ်ခြင်း
             if (score > highscore) {
                 highscore = score;
                 localStorage.setItem("highscore", highscore);
                 document.getElementById("bestScore").innerText = "အများဆုံးမှတ်: " + highscore;
             }
 
-            // "12345" ပြပြီး ဂိမ်းပြန်စခြင်း
-            alert("12345"); 
-            resetGame();
+            let count = 5;
+            countDisplay.style.display = "block";
+            countDisplay.innerText = count;
+
+            let timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countDisplay.innerText = count;
+                } else {
+                    clearInterval(timer);
+                    countDisplay.style.display = "none";
+                    resetGame();
+                }
+            }, 1000);
         }
 
         function resetGame() {
