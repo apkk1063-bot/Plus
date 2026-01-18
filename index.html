@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Car Game Countdown</title>
+    <title>Car Game Auto Restart</title>
     <style>
         body { margin: 0; overflow: hidden; background: #222; font-family: 'Arial', sans-serif; touch-action: manipulation; }
         canvas { background: #333; display: block; margin: 0 auto; border-left: 5px solid #fff; border-right: 5px solid #fff; }
@@ -10,16 +10,18 @@
         .score-text { font-size: 20px; font-weight: bold; color: #00dbff; }
         .best-score { font-size: 14px; color: #ffeb3b; }
         
-        /* စက္ကန့်ပြမည့်နေရာ */
-        #countdown { 
+        /* Countdown Display */
+        #countdown-container { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 80px; font-weight: bold; display: none; z-index: 30;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            text-align: center; display: none; z-index: 30;
         }
+        #countdown-text { color: #ff4444; font-size: 80px; font-weight: bold; }
+        .restart-msg { color: white; font-size: 20px; margin-top: 10px; }
 
         .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-around; z-index: 20; }
         .btn { width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; 
                display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #00dbff; }
+        .btn:active { background: rgba(0, 219, 255, 0.5); }
     </style>
 </head>
 <body>
@@ -28,7 +30,10 @@
         <div id="bestScore" class="best-score">အများဆုံးမှတ်: 0</div>
     </div>
     
-    <div id="countdown">5</div>
+    <div id="countdown-container">
+        <div id="countdown-text">5</div>
+        <div class="restart-msg">ဂိမ်းပြန်စတော့မည်...</div>
+    </div>
 
     <canvas id="gameCanvas"></canvas>
     
@@ -40,7 +45,8 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const countDisplay = document.getElementById("countdown");
+        const countdownContainer = document.getElementById("countdown-container");
+        const countText = document.getElementById("countdown-text");
         
         const scoreSound = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
         const crashSound = new Audio('https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3');
@@ -66,13 +72,13 @@
         let moveRight = false;
         let isGameOver = false;
 
-        document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; });
+        document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); if(!isGameOver) moveLeft = true; });
         document.getElementById("leftBtn").addEventListener("touchend", () => moveLeft = false);
-        document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; });
+        document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); if(!isGameOver) moveRight = true; });
         document.getElementById("rightBtn").addEventListener("touchend", () => moveRight = false);
 
         function update(timestamp) {
-            if (isGameOver) return;
+            if (isGameOver) return; // ရှုံးနေရင် ဘာမှမလုပ်ဘူး
 
             if (moveLeft && car.x > 0) car.x -= 8;
             if (moveRight && car.x < canvas.width - car.w) car.x += 8;
@@ -87,18 +93,22 @@
                 enemies[i].y += enemySpeed;
                 if (car.x < enemies[i].x + enemies[i].w && car.x + car.w > enemies[i].x &&
                     car.y < enemies[i].y + enemies[i].h && car.y + car.h > enemies[i].y) {
-                    startCountdown();
+                    handleGameOver();
                 }
                 if (enemies[i].y > canvas.height) {
                     enemies.splice(i, 1);
                     score++;
                     scoreSound.play();
                     document.getElementById("score").innerText = "အမှတ်: " + score;
+                    if (score % 5 === 0) {
+                        enemySpeed += 0.5;
+                        spawnInterval = Math.max(600, 1500 - (Math.floor(score/5) * 100));
+                    }
                 }
             }
         }
 
-        function startCountdown() {
+        function handleGameOver() {
             isGameOver = true;
             crashSound.play();
 
@@ -109,32 +119,37 @@
             }
 
             let count = 5;
-            countDisplay.style.display = "block";
-            countDisplay.innerText = count;
+            countdownContainer.style.display = "block";
+            countText.innerText = count;
 
             let timer = setInterval(() => {
                 count--;
                 if (count > 0) {
-                    countDisplay.innerText = count;
+                    countText.innerText = count;
                 } else {
                     clearInterval(timer);
-                    countDisplay.style.display = "none";
+                    countdownContainer.style.display = "none";
                     resetGame();
                 }
             }, 1000);
         }
 
         function resetGame() {
-            score = 0; enemySpeed = 5; spawnInterval = 1500;
-            enemies = []; car.x = canvas.width/2 - 25;
+            score = 0;
+            enemySpeed = 5;
+            spawnInterval = 1500;
+            enemies = [];
+            car.x = canvas.width/2 - 25;
             document.getElementById("score").innerText = "အမှတ်: 0";
-            isGameOver = false;
+            isGameOver = false; // ဂိမ်းပြန်စပြီ
+            lastSpawn = performance.now(); // အချိန်ကို ပြန်ညှိပေးရမယ်
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.strokeStyle = "#555"; ctx.setLineDash([30, 30]);
             ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke();
+            
             ctx.drawImage(playerImg, car.x, car.y, car.w, car.h);
             for (let e of enemies) {
                 ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
