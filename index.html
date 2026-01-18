@@ -3,254 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Premium Slip</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Currency Side-by-Side Long</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --accent: #fbbf24;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b41c5;
+            --secondary: #f0f3ff;
+            --white: #ffffff;
+            --border: #e0e4f2;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-gradient);
-            color: white;
+            font-family: sans-serif;
+            background-color: #f4f6fa;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 15px;
         }
 
-        /* ၁။ စလစ်ဒီဇိုင်း (Compact & Sharp) */
-        #capture-area {
-            background: white;
-            width: 310px;
-            padding: 30px 25px;
-            border-radius: 20px;
-            text-align: center;
+        .container {
+            background: var(--white);
+            width: 95%; /* ဖုန်း screen အကျယ်ကို အပြည့်နီးပါး ယူထားသည် */
+            max-width: 500px;
+            border-radius: 30px;
+            padding: 25px 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            color: #1e293b;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .header-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
+        /* Admin Trigger */
+        .admin-cog { position: absolute; top: 15px; right: 20px; cursor: pointer; color: #ddd; font-size: 20px; }
 
-        #displayTime {
-            font-size: 22px;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
+        /* Rate Banner */
+        .rate-banner {
+            background: var(--secondary);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
         }
+        .rate-display { font-weight: 800; font-size: 18px; color: #333; }
 
-        #displayDate {
-            font-size: 17px;
-            font-weight: 600;
-            color: #64748b;
-            margin-top: 5px;
-            display: block;
-        }
-
-        .divider {
-            height: 2px;
-            background-image: linear-gradient(to right, transparent, #e2e8f0 50%, transparent);
-            margin: 20px 0;
-        }
-
-        .rate-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: #94a3b8;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        #displayPrice {
-            font-size: 52px;
-            font-weight: 900;
-            color: #1e1b4b;
-            font-family: 'Courier New', monospace;
-            margin: 8px 0;
-            line-height: 1;
-        }
-
-        /* ၂။ Selector & Controls */
-        .ui-container {
-            width: 310px;
-            margin-top: 25px;
-        }
-
-        .selector-box {
+        /* --- ထိုင်းနဲ မြန်မာ ဘေးတိုက် အရှည်ဒီဇိုင်း --- */
+        .calc-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 8px 15px;
-            border-radius: 100px;
-            margin-bottom: 15px;
-        }
-
-        .nav-btn {
-            background: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #1e1b4b;
-            font-size: 14px;
-        }
-
-        #themeName { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .t-btn {
-            padding: 10px;
-            border: 1px solid var(--glass-border);
-            background: var(--glass);
-            color: #94a3b8;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .t-btn.active {
-            background: white;
-            color: #1e1b4b;
-            border-color: white;
-        }
-
-        .input-field {
+            gap: 10px; /* အကွက်ကြား အကွာအဝေး */
             width: 100%;
-            padding: 14px;
-            border-radius: 15px;
-            border: none;
+        }
+
+        .box {
+            flex: 2; /* အကွက်ကို ပိုရှည်စေရန် */
+            border: 2.5px solid var(--primary);
+            border-radius: 16px;
+            padding: 20px 12px; /* အထဲက အကွာအဝေးကို ပိုချဲ့ထားသည် */
+            position: relative;
             background: white;
-            font-size: 18px;
+            min-width: 0;
+        }
+
+        .box.res { border-color: var(--border); background: var(--secondary); }
+
+        /* စာလုံးအပြည့်ပေါ်စေမည့် Label */
+        .box-tag {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: white;
+            padding: 0 8px;
+            font-size: 12px;
             font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            outline: none;
+            color: var(--primary);
+            white-space: nowrap; /* စာလုံးမပြတ်အောင် */
+            z-index: 5;
         }
+        .box.res .box-tag { background: var(--secondary); color: #777; }
 
-        .btn-save {
+        .box input {
             width: 100%;
-            padding: 15px;
-            border-radius: 15px;
             border: none;
-            background: #6366f1;
-            color: white;
-            font-size: 16px;
+            background: transparent;
+            font-size: 20px; /* ဂဏန်းကို ပိုကြီးကြီးပြသည် */
             font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+            outline: none;
+            color: #111;
         }
 
-        /* Themes */
-        .theme-0 { background: #ffffff !important; color: #1e293b !important; }
-        .theme-1 { background: #1e293b !important; color: white !important; }
-        .theme-1 #displayPrice { color: #38bdf8 !important; }
-        .theme-2 { background: #fffbeb !important; color: #92400e !important; }
-        .theme-2 #displayPrice { color: #b45309 !important; }
-        .theme-3 { background: #111827 !important; color: #fbbf24 !important; border: 2px solid #fbbf24; }
-        .theme-3 #displayPrice { color: #fbbf24 !important; }
-        .theme-4 { background: #ecfdf5 !important; color: #065f46 !important; }
-        .theme-4 #displayPrice { color: #059669 !important; }
+        .swap-icon {
+            flex: 0.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 22px;
+            color: var(--primary);
+            background: var(--secondary);
+            height: 45px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+
+        /* Submit Button */
+        .btn-go {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            float: right;
+            margin-top: 30px;
+            box-shadow: 0 10px 20px rgba(59, 65, 197, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 100px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+        }
+        .nav-item { text-align: center; font-size: 11px; color: #bbb; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+
+        /* Admin Popup */
+        #admin-panel {
+            display: none;
+            position: absolute;
+            top: 50px; right: 20px;
+            background: white; padding: 20px;
+            border-radius: 15px; border: 1px solid #ddd;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 100; width: 220px;
+        }
+        .adm-input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #eee; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div id="capture-area" class="theme-0">
-        <div id="timeIcon" class="header-icon" style="color: #fbbf24;"><i class="fas fa-sun"></i></div>
-        <h2 id="displayTime">နံနက်ခင်းဈေး</h2>
-        <span id="displayDate">ရက်စွဲ - ၁၈ ဇန်နဝါရီ ၂၀၂၆</span>
-        
-        <div class="divider"></div>
-        
-        <div class="rate-label">Current Rate</div>
-        <div id="displayPrice">---</div>
-        
-        <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; font-weight: 600;">
-            <i class="fas fa-check-circle"></i> VERIFIED BY ICONIC
+<div class="container">
+    <div class="admin-cog" onclick="toggleAdmin()">⚙️</div>
+
+    <div id="admin-panel">
+        <div id="login-ui">
+            <h4 style="margin:0 0 10px 0;">Admin Login</h4>
+            <input type="password" id="adm-pass" class="adm-input" placeholder="Password (123456)">
+            <button onclick="login()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Login</button>
+        </div>
+        <div id="edit-ui" style="display:none;">
+            <h4 style="margin:0 0 10px 0;">Update Rates</h4>
+            <input type="number" id="new-t" class="adm-input" placeholder="THB Rate">
+            <input type="number" id="new-m" class="adm-input" placeholder="MMK Rate">
+            <button onclick="update()" style="width:100%; background:#28a745; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Update</button>
         </div>
     </div>
 
-    <div class="ui-container">
-        <div class="selector-box">
-            <button class="nav-btn" onclick="changeTheme(-1)"><i class="fas fa-chevron-left"></i></button>
-            <span id="themeName">White Classic</span>
-            <button class="nav-btn" onclick="changeTheme(1)"><i class="fas fa-chevron-right"></i></button>
+    <div style="font-weight: bold; margin-bottom: 20px; color: var(--primary);">ငွေလဲလှယ်မည်</div>
+
+    <div class="rate-banner">
+        <div class="rate-display">
+            <span id="rate-t">780</span> THB = <span id="rate-m">100,000</span> MMK
         </div>
-
-        <div class="tabs">
-            <button class="t-btn active" onclick="updateMode('morning', 'နံနက်ခင်းဈေး', 'fa-sun', this)">နံနက်</button>
-            <button class="t-btn" onclick="updateMode('noon', 'နေ့လယ်ခင်းဈေး', 'fa-cloud-sun', this)">နေ့လယ်</button>
-            <button class="t-btn" onclick="updateMode('evening', 'ညနေခင်းဈေး', 'fa-moon', this)">ညနေ</button>
-        </div>
-
-        <input type="text" id="priceInput" class="input-field" placeholder="ဈေးနှုန်းရိုက်ပါ" oninput="updatePrice()">
-
-        <button class="btn-save" onclick="saveSlip()">
-            <i class="fas fa-cloud-download-alt"></i> SAVE IMAGE
-        </button>
     </div>
 
-    <script>
-        let currentTheme = 0;
-        const themes = ["White Classic", "Deep Night", "Vintage Gold", "Luxury Black", "Fresh Mint"];
+    <div class="calc-container">
+        <div class="box" id="bl">
+            <span class="box-tag" id="tl">ထိုင်းဘတ် (THB)</span>
+            <input type="number" id="v-in" placeholder="0" oninput="calculate()">
+        </div>
 
-        function changeTheme(dir) {
-            currentTheme = (currentTheme + dir + themes.length) % themes.length;
-            document.getElementById('capture-area').className = `theme-${currentTheme}`;
-            document.getElementById('themeName').innerText = themes[currentTheme];
-        }
+        <div class="swap-icon" onclick="swap()">⇆</div>
 
-        function updatePrice() {
-            document.getElementById('displayPrice').innerText = document.getElementById('priceInput').value || "---";
-        }
+        <div class="box res" id="br">
+            <span class="box-tag" id="tr">မြန်မာကျပ် (MMK)</span>
+            <input type="text" id="v-out" readonly value="0">
+        </div>
+    </div>
 
-        function updateMode(mode, label, iconClass, btn) {
-            document.getElementById('displayTime').innerText = label;
-            document.getElementById('timeIcon').innerHTML = `<i class="fas ${iconClass}"></i>`;
-            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
+    <button class="btn-go">➤</button>
 
-        function saveSlip() {
-            const area = document.getElementById('capture-area');
-            html2canvas(area, { scale: 3, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Slip_${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
+    <div class="footer">
+        <div class="nav-item active">📱<br><span>ဖုန်းငွေဖြည့်</span></div>
+        <div class="nav-item">👥<br><span>လူကြီးမင်း</span></div>
+        <div class="nav-item">🎧<br><span>အကူအညီ</span></div>
+        <div class="nav-item">⚙️<br><span>ဆက်တင်</span></div>
+    </div>
+</div>
 
-        window.onload = () => {
-            const now = new Date();
-            const dateStr = `ရက်စွဲ - ${now.getDate()} ${["ဇန်နဝါရီ", "ဖေဖော်ဝါရီ", "မတ်", "ဧပြီ", "မေ", "ဇွန်", "ဇူလိုင်", "သြဂုတ်", "စက်တင်ဘာ", "အောက်တိုဘာ", "နိုဝင်ဘာ", "ဒီဇင်ဘာ"][now.getMonth()]} ${now.getFullYear()}`;
-            document.getElementById('displayDate').innerText = dateStr;
-        };
-    </script>
+<script>
+    let rT = 780, rM = 100000, isT = true;
+
+    function toggleAdmin() { 
+        let p = document.getElementById('admin-panel'); 
+        p.style.display = (p.style.display==='block')?'none':'block'; 
+    }
+    
+    function login() {
+        if(document.getElementById('adm-pass').value === '123456') {
+            document.getElementById('login-ui').style.display = 'none';
+            document.getElementById('edit-ui').style.display = 'block';
+        } else alert("စကားဝှက်မှားနေပါသည်");
+    }
+
+    function update() {
+        rT = document.getElementById('new-t').value || rT;
+        rM = document.getElementById('new-m').value || rM;
+        document.getElementById('rate-t').innerText = rT;
+        document.getElementById('rate-m').innerText = Number(rM).toLocaleString();
+        toggleAdmin(); calculate();
+    }
+
+    function swap() {
+        isT = !isT;
+        document.getElementById('tl').innerText = isT ? "ထိုင်းဘတ် (THB)" : "မြန်မာကျပ် (MMK)";
+        document.getElementById('tr').innerText = isT ? "မြန်မာကျပ် (MMK)" : "ထိုင်းဘတ် (THB)";
+        document.getElementById('bl').classList.toggle('res', !isT);
+        document.getElementById('br').classList.toggle('res', isT);
+        document.getElementById('v-in').value = ""; document.getElementById('v-out').value = "0";
+    }
+
+    function calculate() {
+        let v = document.getElementById('v-in').value;
+        let o = document.getElementById('v-out');
+        if(v > 0) {
+            let res = isT ? (v * (rM/rT)) : (v / (rM/rT));
+            o.value = Math.round(res).toLocaleString();
+        } else o.value = "0";
+    }
+</script>
+
 </body>
 </html>
