@@ -3,255 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Premium Slip</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Thai Bank Slip Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --primary: #6366f1;
-            --accent: #fbbf24;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-gradient);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 15px;
+        /* --- (၁) ဘဏ်ရွေးချယ်သည့် နေရာ --- */
+        #bank-selection { width: 100%; max-width: 360px; text-align: center; }
+        .bank-card {
+            background: white; padding: 15px; margin: 10px 0; border-radius: 10px;
+            display: flex; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        .bank-card:hover { transform: scale(1.02); }
+        .bank-logo-sm { width: 40px; height: 40px; margin-right: 15px; border-radius: 5px; }
+        .bank-name { font-weight: bold; font-size: 16px; color: #333; }
 
-        /* ၁။ စလစ်ဒီဇိုင်း (Compact & Sharp) */
+        /* --- (၂) စလစ်နှင့် Input နေရာ (ပထမတော့ ဖုံးထားမည်) --- */
+        #main-generator { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
+
+        /* စလစ်ဒီဇိုင်း */
         #capture-area {
-            background: white;
-            width: 310px;
-            padding: 30px 25px;
-            border-radius: 20px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            color: #1e293b;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 340px; background: white; border-radius: 10px; padding: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; box-sizing: border-box;
         }
+        .header { display: flex; align-items: center; margin-bottom: 15px; }
+        .bank-text { border-left: 2px solid #ddd; padding-left: 10px; flex-grow: 1; margin-left: 10px; }
+        .th { font-size: 14px; font-weight: bold; color: #333; display: block; }
+        .en { font-size: 11px; color: #666; font-weight: bold; }
+        .main-logo { width: 40px; height: 40px; }
 
-        .header-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-            display: inline-block;
+        .name-row {
+            color: white; padding: 12px; font-weight: bold; font-size: 18px;
+            text-transform: uppercase; border-radius: 4px; margin-top: 10px;
         }
+        .acc-number { font-size: 26px; font-weight: bold; color: #222; margin-top: 15px; font-family: monospace; }
 
-        #displayTime {
-            font-size: 22px;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-
-        #displayDate {
-            font-size: 17px;
-            font-weight: 600;
-            color: #64748b;
-            margin-top: 5px;
-            display: block;
-        }
-
-        .divider {
-            height: 2px;
-            background-image: linear-gradient(to right, transparent, #e2e8f0 50%, transparent);
-            margin: 20px 0;
-        }
-
-        .rate-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: #94a3b8;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        #displayPrice {
-            font-size: 52px;
-            font-weight: 900;
-            color: #1e1b4b;
-            font-family: 'Courier New', monospace;
-            margin: 8px 0;
-            line-height: 1;
-        }
-
-        /* ၂။ Selector & Controls */
-        .ui-container {
-            width: 310px;
-            margin-top: 25px;
-        }
-
-        .selector-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 8px 15px;
-            border-radius: 100px;
-            margin-bottom: 15px;
-        }
-
-        .nav-btn {
-            background: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #1e1b4b;
-            font-size: 14px;
-        }
-
-        #themeName { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .t-btn {
-            padding: 10px;
-            border: 1px solid var(--glass-border);
-            background: var(--glass);
-            color: #94a3b8;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .t-btn.active {
-            background: white;
-            color: #1e1b4b;
-            border-color: white;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 14px;
-            border-radius: 15px;
-            border: none;
-            background: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        .btn-save {
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            border: none;
-            background: #6366f1;
-            color: white;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
-        }
-
-        /* Themes */
-        .theme-0 { background: #ffffff !important; color: #1e293b !important; }
-        .theme-1 { background: #1e293b !important; color: white !important; }
-        .theme-1 #displayPrice { color: #38bdf8 !important; }
-        .theme-2 { background: #fffbeb !important; color: #92400e !important; }
-        .theme-2 #displayPrice { color: #b45309 !important; }
-        .theme-3 { background: #111827 !important; color: #fbbf24 !important; border: 2px solid #fbbf24; }
-        .theme-3 #displayPrice { color: #fbbf24 !important; }
-        .theme-4 { background: #ecfdf5 !important; color: #065f46 !important; }
-        .theme-4 #displayPrice { color: #059669 !important; }
+        /* Input နေရာ */
+        .controls { background: white; padding: 15px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        .save-btn { width: 100%; padding: 14px; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .back-btn { margin-top: 15px; background: none; border: none; color: #666; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div id="capture-area" class="theme-0">
-        <div id="timeIcon" class="header-icon" style="color: #fbbf24;"><i class="fas fa-sun"></i></div>
-        <h2 id="displayTime">နံနက်ခင်းဈေး</h2>
-        <span id="displayDate">ရက်စွဲ - ၁၈ ဇန်နဝါရီ ၂၀၂၆</span>
-        
-        <div class="divider"></div>
-        
-        <div class="rate-label">Current Rate</div>
-        <div id="displayPrice">---</div>
-        
-        <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; font-weight: 600;">
-            <i class="fas fa-check-circle"></i> VERIFIED BY ICONIC
+    <div id="bank-selection">
+        <h3>ထိုင်းဘဏ်ကို ရွေးချယ်ပါ</h3>
+        <div class="bank-card" onclick="selectBank('kbank')">
+            <img class="bank-logo-sm" src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f0/Kasikornbank_Logo.svg/1200px-Kasikornbank_Logo.svg.png">
+            <span class="bank-name">Kasikorn Bank (K-Bank)</span>
+        </div>
+        <div class="bank-card" onclick="selectBank('scb')">
+            <img class="bank-logo-sm" src="https://www.scb.co.th/content/dam/scb/about-us/news/scb-announces-new-logo/scb-logo.png">
+            <span class="bank-name">Siam Commercial Bank (SCB)</span>
+        </div>
+        <div class="bank-card" onclick="selectBank('bbl')">
+            <img class="bank-logo-sm" src="https://www.bangkokbank.com/-/media/library/images/global/logo/bbl_logo.png">
+            <span class="bank-name">Bangkok Bank</span>
+        </div>
+        <div class="bank-card" onclick="selectBank('ktb')">
+            <img class="bank-logo-sm" src="https://krungthai.com/Resource/Common/Graphic/logo-krungthai-bank.png">
+            <span class="bank-name">Krungthai Bank</span>
+        </div>
+        <div class="bank-card" onclick="selectBank('bay')">
+            <img class="bank-logo-sm" src="https://www.krungsri.com/Krungsri2018/media/Contents/About-Krungsri/krungsri-logo.png">
+            <span class="bank-name">Krungsri Bank</span>
         </div>
     </div>
 
-    <div class="ui-container">
-        <div class="selector-box">
-            <button class="nav-btn" onclick="changeTheme(-1)"><i class="fas fa-chevron-left"></i></button>
-            <span id="themeName">White Classic</span>
-            <button class="nav-btn" onclick="changeTheme(1)"><i class="fas fa-chevron-right"></i></button>
+    <div id="main-generator">
+        <div id="capture-area">
+            <div class="header">
+                <img id="slip-logo" class="main-logo" src="">
+                <div class="bank-text">
+                    <span id="slip-bank-th" class="th"></span>
+                    <span id="slip-bank-en" class="en"></span>
+                </div>
+            </div>
+            <div id="name-bar" class="name-row">MR. <span id="out-name">NAME HERE</span></div>
+            <div class="acc-number" id="out-bank">000-000-0000</div>
         </div>
 
-        <div class="tabs">
-            <button class="t-btn active" onclick="updateMode('morning', 'နံနက်ခင်းဈေး', 'fa-sun', this)">နံနက်</button>
-            <button class="t-btn" onclick="updateMode('noon', 'နေ့လယ်ခင်းဈေး', 'fa-cloud-sun', this)">နေ့လယ်</button>
-            <button class="t-btn" onclick="updateMode('evening', 'ညနေခင်းဈေး', 'fa-moon', this)">ညနေ</button>
+        <div class="controls">
+            <input type="text" id="in-name" oninput="sync()" placeholder="နာမည် (NAME)" style="text-transform: uppercase;">
+            <input type="text" id="in-bank" inputmode="numeric" maxlength="10" oninput="sync()" placeholder="ဘဏ်နံပါတ် (0000000000)">
+            <button id="save-btn" class="save-btn" onclick="save()">SAVE IMAGE</button>
+            <center><button class="back-btn" onclick="goBack()">ဘဏ်ပြန်ရွေးမည်</button></center>
         </div>
-
-        <input type="text" id="priceInput" class="input-field" placeholder="ဈေးနှုန်းရိုက်ပါ" oninput="updatePrice()">
-
-        <button class="btn-save" onclick="saveSlip()">
-            <i class="fas fa-cloud-download-alt"></i> SAVE IMAGE
-        </button>
     </div>
 
     <script>
-        let currentTheme = 0;
-        const themes = ["White Classic", "Deep Night", "Vintage Gold", "Luxury Black", "Fresh Mint"];
+        const banks = {
+            kbank: { color: '#00A950', th: 'ธนาคารกสิกรไทย', en: 'KASIKORNBANK', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f0/Kasikornbank_Logo.svg/1200px-Kasikornbank_Logo.svg.png' },
+            scb: { color: '#4e2e7f', th: 'ธนาคารไทยพาณิชย์', en: 'SIAM COMMERCIAL BANK', logo: 'https://www.scb.co.th/content/dam/scb/about-us/news/scb-announces-new-logo/scb-logo.png' },
+            bbl: { color: '#1e4598', th: 'ธนาคารกรุงเทพ', en: 'BANGKOK BANK', logo: 'https://www.bangkokbank.com/-/media/library/images/global/logo/bbl_logo.png' },
+            ktb: { color: '#00a1e0', th: 'ธนาคารกรุงไทย', en: 'KRUNGTHAI BANK', logo: 'https://krungthai.com/Resource/Common/Graphic/logo-krungthai-bank.png' },
+            bay: { color: '#fec43b', th: 'ธนาคารกรุงศรีอยุธยา', en: 'KRUNGSRI BANK', logo: 'https://www.krungsri.com/Krungsri2018/media/Contents/About-Krungsri/krungsri-logo.png' }
+        };
 
-        function changeTheme(dir) {
-            currentTheme = (currentTheme + dir + themes.length) % themes.length;
-            document.getElementById('capture-area').className = `theme-${currentTheme}`;
-            document.getElementById('themeName').innerText = themes[currentTheme];
+        let activeColor = '';
+
+        function selectBank(key) {
+            const bank = banks[key];
+            activeColor = bank.color;
+            document.getElementById('slip-logo').src = bank.logo;
+            document.getElementById('slip-bank-th').innerText = bank.th;
+            document.getElementById('slip-bank-en').innerText = bank.en;
+            document.getElementById('name-bar').style.backgroundColor = bank.color;
+            document.getElementById('save-btn').style.backgroundColor = bank.color;
+            
+            document.getElementById('bank-selection').style.display = 'none';
+            document.getElementById('main-generator').style.display = 'flex';
         }
 
-        function updatePrice() {
-            document.getElementById('displayPrice').innerText = document.getElementById('priceInput').value || "---";
+        function goBack() {
+            document.getElementById('bank-selection').style.display = 'block';
+            document.getElementById('main-generator').style.display = 'none';
         }
 
-        function updateMode(mode, label, iconClass, btn) {
-            document.getElementById('displayTime').innerText = label;
-            document.getElementById('timeIcon').innerHTML = `<i class="fas ${iconClass}"></i>`;
-            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function sync() {
+            let n = document.getElementById('in-name').value.toUpperCase();
+            document.getElementById('in-name').value = n;
+            document.getElementById('out-name').innerText = n || "NAME HERE";
+
+            let b = document.getElementById('in-bank');
+            let v = b.value.replace(/\D/g, ''); 
+            b.value = v;
+
+            let fmt = "000-000-0000";
+            if (v.length > 0) {
+                fmt = v.substring(0, 3).padEnd(3, '0') + "-" + v.substring(3, 6).padEnd(3, '0') + "-" + v.substring(6, 10).padEnd(4, '0');
+            }
+            document.getElementById('out-bank').innerText = fmt;
         }
 
-        function saveSlip() {
-            const area = document.getElementById('capture-area');
-            html2canvas(area, { scale: 3, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Slip_${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
+        function save() {
+            html2canvas(document.getElementById('capture-area'), { scale: 3, useCORS: true }).then(canvas => {
+                let l = document.createElement('a');
+                l.download = 'bank-slip.png';
+                l.href = canvas.toDataURL();
+                l.click();
             });
         }
-
-        window.onload = () => {
-            const now = new Date();
-            const dateStr = `ရက်စွဲ - ${now.getDate()} ${["ဇန်နဝါရီ", "ဖေဖော်ဝါရီ", "မတ်", "ဧပြီ", "မေ", "ဇွန်", "ဇူလိုင်", "သြဂုတ်", "စက်တင်ဘာ", "အောက်တိုဘာ", "နိုဝင်ဘာ", "ဒီဇင်ဘာ"][now.getMonth()]} ${now.getFullYear()}`;
-            document.getElementById('displayDate').innerText = dateStr;
-        };
     </script>
 </body>
 </html>
-
